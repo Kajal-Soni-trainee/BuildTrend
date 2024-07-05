@@ -18,7 +18,9 @@ const addProperty = async (req, res) => {
 
 const getProperty = async (req, res) => {
   const id = req.user[0].u_id;
+  console.log(id);
   const result = await getAllPropertyByUserID(id);
+  console.log(result);
   res.json(result);
 };
 
@@ -63,8 +65,27 @@ const getWorkProof = async (req, res) => {
     console.log(err);
   }
 };
-const sendMsg = async (req, res) => {};
+const sendMsg = async (req, res) => {
+  const { sender_id, receiver_id, message } = req.body;
+  const query =
+    "insert into messages (sender_id,receiver_id,message) values (?,?,?);";
+  const result = await execute(query, [sender_id, receiver_id, message]);
+  return result;
+};
 
+const editProperty = async (req, res) => {
+  const { id, name, address } = req.body;
+  const query = "update properties set name=?, address=? where property_id=?;";
+  const result = await execute(query, [name, address, id]);
+  res.json(result);
+};
+const deleteProperty = async (req, res) => {
+  const id = req.query.id;
+  const query =
+    "update properties set deleted_at=current_timestamp(), isDeleted=1 where property_id=?";
+  const result = await execute(query, [id]);
+  res.json(result);
+};
 module.exports = {
   addProperty,
   getProperty,
@@ -73,4 +94,6 @@ module.exports = {
   selectEstimate,
   getWorkProof,
   sendMsg,
+  deleteProperty,
+  editProperty,
 };

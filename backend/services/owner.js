@@ -1,7 +1,7 @@
 const { execute } = require("../dbConnections/executeQuery");
 
 const getAllPropertyByUserID = async (id) => {
-  const query = "select * from properties where owner_id=?";
+  const query = "select * from properties where owner_id=? and isDeleted=0";
   try {
     const result = await execute(query, [id]);
     return result;

@@ -13,5 +13,11 @@ const addWorkProof = async (req, res) => {
   const result = await insertWorkProof(req.body, req.file);
   res.json(result);
 };
-const sendMsg = async (req, res) => {};
+const sendMsg = async (req, res) => {
+  const { sender_id, receiver_id, message } = req.body;
+  const query =
+    "insert into messages (sender_id,receiver_id,message) values (?,?,?);";
+  const result = await execute(query, [sender_id, receiver_id, message]);
+  return result;
+};
 module.exports = { addEstimate, addWorkProof, sendMsg };

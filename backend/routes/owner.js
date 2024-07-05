@@ -14,6 +14,8 @@ const {
   selectEstimate,
   getWorkProof,
   sendMsg,
+  deleteProperty,
+  editProperty,
 } = require("../controllers/propertyOwner");
 route.post(
   "/addProperty",
@@ -23,10 +25,24 @@ route.post(
 route.get(
   "/getProperty",
   passport.authenticate("jwt", { session: false }),
-  upload.array("images"),
   getProperty
 );
-route.post("/addJob", upload.array("files"), addJob);
+route.post(
+  "/editProperty",
+  passport.authenticate("jwt", { session: false }),
+  editProperty
+);
+route.get(
+  "/deleteProperty",
+  passport.authenticate("jwt", { session: false }),
+  deleteProperty
+);
+route.post(
+  "/addJob",
+  upload.array("files"),
+  passport.authenticate("jwt", { session: false }),
+  addJob
+);
 route.get("/showEstimates", showEstimates);
 route.post("/selectEstimate", selectEstimate);
 route.post("/getWorkProof", getWorkProof);

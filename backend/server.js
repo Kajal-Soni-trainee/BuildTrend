@@ -10,7 +10,14 @@ const userRoute = require("./routes/user");
 const ownerRoute = require("./routes/owner");
 const contractorRoute = require("./routes/contractor");
 const cors = require("cors");
-app.use(cors());
+var allowCrossDomain = function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "http://localhost:8080");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+};
+app.use(allowCrossDomain);
 app.use("/", userRoute);
 app.use("/", ownerRoute);
 app.use("/", contractorRoute);

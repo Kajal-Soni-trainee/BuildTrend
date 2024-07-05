@@ -1,5 +1,12 @@
 <template>
-  <v-container>
+  <v-card
+    style="width: 1000px; max-height: 800px"
+    class="pa-5 rounded-xl scroll"
+    :elevation="12"
+  >
+    <v-card-title class="text-center text-h4 text-teal-darken-4"
+      >Add Task Form</v-card-title
+    >
     <tempalte v-for="job in jobDetails" :key="job.id">
       <Form
         v-model:title="job.title"
@@ -7,16 +14,21 @@
         v-model:images="job.images"
       />
     </tempalte>
-    <v-btn @click="addJob">Add Job</v-btn>
+    <v-btn variant="outlined" color="teal-darken-3" @click="addJob"
+      >Add Job</v-btn
+    >
     <div class="d-flex flex-row justify-center align-center">
-      <v-btn @click="submitJob" class="bg-primary">Submit</v-btn>
+      <v-btn @click="submitJob" class="bg-teal-darken-4">Submit</v-btn>
     </div>
-  </v-container>
+  </v-card>
 </template>
 <script setup>
 import { reactive } from "vue";
 import Form from "./Form.vue";
-import axios from "axios";
+import { axiosPost } from "../services/service";
+import { useRoute } from "vue-router";
+const route = useRoute();
+const property_id = route.params.id;
 const jobDetails = reactive([
   {
     id: 1,
@@ -38,7 +50,9 @@ function addJob() {
 
 async function submitJob() {
   console.log(jobDetails);
+  console.log(property_id);
   const formData = new FormData();
+  formData.append("property_id", property_id);
   jobDetails.forEach((item) => {
     console.log(item);
     formData.append("id[]", item.id);
@@ -49,10 +63,13 @@ async function submitJob() {
       formData.append("files", image, item.id);
     });
   });
-
   console.log(formData);
-  const result = await axios.post("http://localhost:8000/addJob", formData);
-  console.log(result);
+  const result = await axiosPost("/addJob", formData);
+  console.log(result.data);
 }
 </script>
-<style></style>
+<style scoped>
+.scroll {
+  overflow-y: scroll;
+}
+</style>

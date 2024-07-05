@@ -4,8 +4,9 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 const registerUser = async (req, res) => {
-  const { name, email, contact, address, password, cpassword, role } = req.body;
+  const { name, email, contact, address, password, role } = req.body;
   const salt = await bcrypt.genSalt(10);
+  console.log(req.body, salt);
   const hashPassword = await bcrypt.hash(password, salt);
   let query =
     "insert into users (u_name,u_email,u_contact,u_address,u_password,u_role) values (?,?,?,?,?,?);";
@@ -34,20 +35,21 @@ const loginUser = async (req, res) => {
       const payload = {
         id: result[0].u_id,
         email: result[0].u_email,
-        password: result[0].u_password,
+        role: result[0].u_role,
       };
       const token = jwt.sign(payload, process.env.SECRET_KEY);
       res.cookie("token", token, {
         maxAge: 1000 * 60 * 60 * 2,
         httpOnly: true,
       });
-      res.json(token);
+      const role = result[0].u_role;
+      res.json({ token, role });
     }
   }
 };
 
 const forgetPassword = async (req, res) => {
-  const { email, password, cpassword } = req.body;
+  const { email, password } = req.body;
   const salt = await bcrypt.genSalt(10);
   const hashPassword = await bcrypt.hash(password, salt);
   const user = await findByEmail(email);

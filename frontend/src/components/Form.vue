@@ -9,7 +9,7 @@
       label="Images"
       variant="solo-filled"
       multiple
-      prepend-icon="mdi-camera"
+      prepend-inner-icon="mdi-camera"
       v-model="images"
     ></v-file-input>
     <v-textarea
