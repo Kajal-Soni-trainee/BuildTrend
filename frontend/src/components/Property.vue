@@ -22,7 +22,11 @@
           <v-btn class="bg-teal-darken-4" @click="addJob(item.property_id)"
             >Add Job</v-btn
           >
-          <v-btn class="bg-teal-darken-4" @click="editProperty">Edit</v-btn>
+          <v-btn
+            class="bg-teal-darken-4"
+            @click="editProperty(item.property_id)"
+            >Edit</v-btn
+          >
           <v-btn
             class="bg-teal-darken-4"
             @click="deleteProperty(item.property_id)"
@@ -44,13 +48,16 @@ const properties = computed(() => {
   console.log(store.state.property.properties);
   return store.state.property.properties;
 });
-function editProperty() {}
+function editProperty(id) {
+  router.push({ name: "UpdateProperty", params: { id: id } });
+}
 async function deleteProperty(id) {
   const result = await axiosGet(`/deleteProperty?id=${id}`);
   console.log(result);
 }
 
 function addJob(id) {
+  console.log(id);
   router.push({ name: "JobForm", params: { id: id } });
 }
 

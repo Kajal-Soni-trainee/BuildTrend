@@ -75,7 +75,8 @@ const sendMsg = async (req, res) => {
 
 const editProperty = async (req, res) => {
   const { id, name, address } = req.body;
-  const query = "update properties set name=?, address=? where property_id=?;";
+  const query =
+    "update properties set property_name=?, property_address=? where property_id=?;";
   const result = await execute(query, [name, address, id]);
   res.json(result);
 };
@@ -84,6 +85,12 @@ const deleteProperty = async (req, res) => {
   const query =
     "update properties set deleted_at=current_timestamp(), isDeleted=1 where property_id=?";
   const result = await execute(query, [id]);
+  res.json(result);
+};
+const getPropertyById = async (req, res) => {
+  const property_id = req.query.id;
+  const query = "select * from properties where property_id=? and isDeleted=0;";
+  const result = await execute(query, [property_id]);
   res.json(result);
 };
 module.exports = {
@@ -96,4 +103,5 @@ module.exports = {
   sendMsg,
   deleteProperty,
   editProperty,
+  getPropertyById,
 };

@@ -20,4 +20,11 @@ const sendMsg = async (req, res) => {
   const result = await execute(query, [sender_id, receiver_id, message]);
   return result;
 };
-module.exports = { addEstimate, addWorkProof, sendMsg };
+
+const showJobs = async (req, res) => {
+  const query =
+    "select * from users inner join (select job_id, properties.property_id, property_name, property_address, properties.owner_id from jobs inner join properties on jobs.property_id=properties.property_id where jobs.isDeleted=0) as a on users.u_id=a.owner_id; ";
+  const result = await execute(query);
+  res.json(result);
+};
+module.exports = { addEstimate, addWorkProof, sendMsg, showJobs };

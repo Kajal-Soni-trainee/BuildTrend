@@ -20,20 +20,25 @@ const addNewJob = async (owner_id, property_id) => {
   }
 };
 const addUserState = async (job_id, owner_id) => {
-  const query = "insert into owner_state (owner_id, job_id) values (?,?);";
+  console.log(job_id);
+  const query =
+    "insert into owner_state (owner_id, job_id, state) values (?,?,0);";
   try {
-    const result = await execute(query, [job_id, owner_id]);
+    const result = await execute(query, [owner_id, job_id]);
   } catch (err) {
     console.log(err);
   }
 };
 const addCategoryDetails = async (dataObj, files, job_id) => {
-  const { id, title, description } = dataObj;
+  const { property_id, id, title, description } = dataObj;
+  console.log("id", id);
+  console.log("title ", title);
+  console.log("description", description);
   try {
     for (let i = 0; i < id.length; i++) {
       const query =
-        "insert into jobs_categories (job_id, title,description) values (?,?);";
-      const result = await execute(query, job_id, title[i], description[i]);
+        "insert into jobs_categories (job_id, title,description) values (?,?,?);";
+      const result = await execute(query, [job_id, title[i], description[i]]);
       const categoryId = result.insertId;
       files.forEach(async (image) => {
         if (image.originalname == id[i]) {

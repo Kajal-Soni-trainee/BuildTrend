@@ -23,12 +23,12 @@
   </v-card>
 </template>
 <script setup>
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import Form from "./Form.vue";
 import { axiosPost } from "../services/service";
 import { useRoute } from "vue-router";
 const route = useRoute();
-const property_id = route.params.id;
+const property_id = ref(route.params.id);
 const jobDetails = reactive([
   {
     id: 1,
@@ -50,9 +50,10 @@ function addJob() {
 
 async function submitJob() {
   console.log(jobDetails);
-  console.log(property_id);
+  console.log(route.params.id);
+  console.log(property_id.value);
   const formData = new FormData();
-  formData.append("property_id", property_id);
+  formData.append("property_id", property_id.value);
   jobDetails.forEach((item) => {
     console.log(item);
     formData.append("id[]", item.id);

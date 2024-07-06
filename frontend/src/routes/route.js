@@ -30,7 +30,19 @@ const routes = [
   {
     name: "JobForm",
     component: () => import("../components/JobForm.vue"),
-    path: "/addJob",
+    path: "/addJob/:id",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "UpdateProperty",
+    component: () => import("../components/updateProperty.vue"),
+    path: "/updateProperty/:id",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "ShowJob",
+    component: () => import("../components/ShowJob.vue"),
+    path: "/showJobs",
     meta: { requiredAuth: true },
   },
 ];

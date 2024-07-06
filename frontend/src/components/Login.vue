@@ -80,6 +80,9 @@ async function login() {
     if (res.data.role == 0) {
       router.push({ name: "Property" });
     }
+    if (res.data.role == 1) {
+      router.push({ name: "ShowJob" });
+    }
   }
 }
 async function forgetPassword() {
