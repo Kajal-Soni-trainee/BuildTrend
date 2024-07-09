@@ -45,6 +45,66 @@ const routes = [
     path: "/showJobs",
     meta: { requiredAuth: true },
   },
+  {
+    name: "ShowTask",
+    component: () => import("../components/ShowTask.vue"),
+    path: "/showTask/:job_id",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "ContractorContacts",
+    component: () => import("../components/ContractorContacts.vue"),
+    path: "/contacts",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "OwnerContacts",
+    component: () => import("../components/OwnerContacts.vue"),
+    path: "/contactList",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "ContractorMsg",
+    component: () => import("../components/ContractorMsg.vue"),
+    path: "/messageCon",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "OwnerJobs",
+    component: () => import("../components/OwnerJobs.vue"),
+    path: "/jobs",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "Estimates",
+    component: () => import("../components/Estimates.vue"),
+    path: "/estimates/:job_id",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "OwnerMsg",
+    component: () => import("../components/OwnerMsg.vue"),
+    path: "/messages",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "WorkProofForm",
+    component: () => import("../components/workProofForm.vue"),
+    path: "/addWorkProof",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "WorkProofs",
+    component: () => import("../components/showWorkProof.vue"),
+    path: "/showWorkProofs/:job_id",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "WorkProofContractor",
+    comment: () => import("../components/WorkProofContractor.vue"),
+    path: "/workProofs",
+    meta: { requiredAuth: true },
+  },
 ];
 
 const router = createRouter({

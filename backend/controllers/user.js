@@ -63,4 +63,8 @@ const forgetPassword = async (req, res) => {
     res.json(err);
   }
 };
-module.exports = { registerUser, loginUser, forgetPassword };
+const logout = async (req, res) => {
+  res.clearCookie("token");
+  res.json(true);
+};
+module.exports = { registerUser, loginUser, forgetPassword, logout };

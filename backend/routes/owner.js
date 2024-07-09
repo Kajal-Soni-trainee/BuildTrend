@@ -14,9 +14,13 @@ const {
   selectEstimate,
   getWorkProof,
   sendMsg,
+  getMessages,
   deleteProperty,
   editProperty,
   getPropertyById,
+  deleteEstimate,
+  getAllMessages,
+  addComment,
 } = require("../controllers/propertyOwner");
 route.post(
   "/addProperty",
@@ -49,8 +53,39 @@ route.get(
   passport.authenticate("jwt", { session: false }),
   getPropertyById
 );
-route.get("/showEstimates", showEstimates);
-route.post("/selectEstimate", selectEstimate);
-route.post("/getWorkProof", getWorkProof);
-route.post("/sendMsg", sendMsg);
+route.get(
+  "/showEstimates",
+  passport.authenticate("jwt", { session: false }),
+  showEstimates
+);
+route.get(
+  "/deleteEstimate",
+  passport.authenticate("jwt", { session: false }),
+  deleteEstimate
+);
+route.post(
+  "/selectEstimate",
+  passport.authenticate("jwt", { session: false }),
+  selectEstimate
+);
+route.get(
+  "/getMessageOwner",
+  passport.authenticate("jwt", { session: false }),
+  getMessages
+);
+route.get(
+  "/getAllMsgs",
+  passport.authenticate("jwt", { session: false }),
+  getAllMessages
+);
+route.get(
+  "/getWorkProof",
+  passport.authenticate("jwt", { session: false }),
+  getWorkProof
+);
+route.post(
+  "/addComment",
+  passport.authenticate("jwt", { session: false }),
+  addComment
+);
 module.exports = route;

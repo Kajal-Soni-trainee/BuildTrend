@@ -1,8 +1,9 @@
 const { execute } = require("../dbConnections/executeQuery");
 const createEstimate = async (obj, contractor_id) => {
   const { job_id, cost } = obj;
+  console.log(job_id, cost);
   const query =
-    "insert into estimates (job_id, contractor_id, cost) values (?,?);";
+    "insert into estimates (job_id, contractor_id, cost) values (?,?,?);";
   try {
     const result = await execute(query, [job_id, contractor_id, cost]);
     const stateQuery = "select * from owner_state where job_id=?;";
@@ -18,31 +19,24 @@ const createEstimate = async (obj, contractor_id) => {
 };
 
 const insertWorkProof = async (dataObj, files) => {
-  const { id, job_id, job_category_id, description } = dataObj;
+  const { job_id, job_category_id, description } = dataObj;
   try {
-    for (let i = 0; i < id.length; i++) {
-      const query =
-        "insert into work_proofs (job_id, job_category_id, description) values (?,?,?);";
-      const result = await execute(query, [
-        job_id[i],
-        job_category_id[i],
-        description[i],
-      ]);
-      const work_proof_id = result.insertId;
-      files.forEach(async (element) => {
-        if (element.originalname == id[i]) {
-          const img_path = "/uploads/" + element.filename;
-          const insertImageQuery =
-            "insert into work_proof_images (work_proof_id,image) values (?,?);";
-          const imageResult = await execute(insertImageQuery, [
-            work_proof_id,
-            img_path,
-          ]);
-        }
-      });
-    }
+    const query1 =
+      "insert into work_proofs (job_id, job_category_id, description) values (?,?,?)";
+    const result = await execute(query1, [
+      job_id,
+      job_category_id,
+      description,
+    ]);
+    const work_proof_id = result.insertId;
+    files.forEach(async (element) => {
+      const imageQuery =
+        "insert into work_proof_images (work_proof_id, image) values (?,?);";
+      const img_path = "/uploads/" + element.filename;
+      const imageResult = await execute(imageQuery, [work_proof_id, img_path]);
+    });
     const updateStateQuery =
-      "update contractor_state set state=1 where job_id=?;";
+      "update contractor_state set state=2 where job_id=?;";
     const stateUpdated = await execute(updateStateQuery, [job_id[0]]);
     return true;
   } catch (err) {
@@ -50,4 +44,22 @@ const insertWorkProof = async (dataObj, files) => {
   }
 };
 
-module.exports = { createEstimate, insertWorkProof };
+const showTaskByJobId = async (job_id) => {
+  const query =
+    "select * from jobs_categories join job_category_images on jobs_categories.job_category_id=job_category_images.job_category_id where jobs_categories.job_id=?;";
+  const result = await execute(query, [job_id]);
+  return result;
+};
+
+const createState = async (job_id, contractor_id) => {
+  const query =
+    "insert into contractor_state (job_id,contractor_id,state) values (?,?,0);";
+  const result = await execute(query, [job_id, contractor_id]);
+  return result;
+};
+module.exports = {
+  createEstimate,
+  insertWorkProof,
+  showTaskByJobId,
+  createState,
+};

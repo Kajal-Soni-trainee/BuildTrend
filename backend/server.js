@@ -4,6 +4,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookie());
+app.use(express.static("public"));
 require("dotenv").config();
 const port = process.env.PORT;
 const userRoute = require("./routes/user");

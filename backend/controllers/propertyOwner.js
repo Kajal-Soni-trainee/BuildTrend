@@ -5,7 +5,10 @@ const {
   addUserState,
   getAllPropertyByUserID,
   getEstimateByJobId,
-  getWorkProofByjobId,
+  deleteOthersEstimate,
+  addJobContractor,
+  updateStates,
+  getWorkProofByJobId,
 } = require("../services/owner");
 const addProperty = async (req, res) => {
   const { name, address } = req.body;
@@ -25,7 +28,7 @@ const getProperty = async (req, res) => {
 };
 
 const addJob = async (req, res) => {
-  let owner_id = req.user[0].u_id;
+  const owner_id = req.user[0].u_id;
   console.log(req.body);
   console.log(req.files);
   try {
@@ -47,11 +50,12 @@ const showEstimates = async (req, res) => {
 };
 
 const selectEstimate = async (req, res) => {
+  const owner_id = req.user[0].u_id;
   const { estimate_id, job_id, contractor_id } = req.body;
   try {
     const result1 = await deleteOthersEstimate(estimate_id, job_id);
     const result2 = await addJobContractor(contractor_id, job_id);
-    const result3 = await updateStates(job_id);
+    const result3 = await updateStates(contractor_id, owner_id, job_id);
   } catch (err) {
     console.log(err);
   }
@@ -59,8 +63,8 @@ const selectEstimate = async (req, res) => {
 const getWorkProof = async (req, res) => {
   const job_id = req.query.job_id;
   try {
-    const result = await getWorkProofByjobId(job_id);
-    res.json(result);
+    const [result1, result2] = await getWorkProofByJobId(job_id);
+    res.json({ result1: result1, result2: result2 });
   } catch (err) {
     console.log(err);
   }
@@ -93,6 +97,41 @@ const getPropertyById = async (req, res) => {
   const result = await execute(query, [property_id]);
   res.json(result);
 };
+const deleteEstimate = async (req, res) => {
+  const query =
+    "update estimates set isDeleted=1, deleted_at=current_timestamp() where estimate_id=?;";
+  const result = await execute(query, [req.query.id]);
+  res.json(result);
+};
+const getMessages = async (req, res) => {
+  let owner_id = req.user[0].u_id;
+  const query =
+    "with lastMsg as (select sender_id, receiver_id, job_id, max(created_at) as created_at from messages group by sender_id , receiver_id, job_id) select u_name, a.sender_name, a.sender_id, a.receiver_id, a.job_id ,a.message from users inner join ( select u_name as sender_name, lastMsg.sender_id, lastMsg.job_id, lastMsg.receiver_id, message from lastMsg inner join messages on messages.sender_id=lastMsg.sender_id and messages.created_at=lastMsg.created_at inner join users on users.u_id=lastMsg.sender_id) as a on users.u_id=a.receiver_id; ";
+  const result = await execute(query);
+  res.json({ result: result, owner_id: owner_id });
+};
+
+const getAllMessages = async (req, res) => {
+  const { job_id, sender_id, receiver_id } = req.query;
+  const query =
+    "select * from messages where job_id=? and sender_id in (?,?) and receiver_id in(?,?) and isDeleted=0;";
+  const result = await execute(query, [
+    job_id,
+    sender_id,
+    receiver_id,
+    sender_id,
+    receiver_id,
+  ]);
+  console.log(result);
+  res.json(result);
+};
+
+const addComment = async (req, res) => {
+  const { work_proof_id, comment } = req.body;
+  const query = "insert into comments (comment, work_proof_id) values (?,?);";
+  const result = await execute(query, [comment, work_proof_id]);
+  res.json(result);
+};
 module.exports = {
   addProperty,
   getProperty,
@@ -104,4 +143,8 @@ module.exports = {
   deleteProperty,
   editProperty,
   getPropertyById,
+  deleteEstimate,
+  getMessages,
+  getAllMessages,
+  addComment,
 };
