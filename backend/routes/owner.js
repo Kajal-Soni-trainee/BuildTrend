@@ -13,7 +13,6 @@ const {
   showEstimates,
   selectEstimate,
   getWorkProof,
-  sendMsg,
   getMessages,
   deleteProperty,
   editProperty,
@@ -21,6 +20,9 @@ const {
   deleteEstimate,
   getAllMessages,
   addComment,
+  jobDoneAccepted,
+  jobDoneRejected,
+  getJobByPropId,
 } = require("../controllers/propertyOwner");
 route.post(
   "/addProperty",
@@ -87,5 +89,21 @@ route.post(
   "/addComment",
   passport.authenticate("jwt", { session: false }),
   addComment
+);
+route.post(
+  "/jobDoneAccepted",
+  passport.authenticate("jwt", { session: false }),
+  jobDoneAccepted
+);
+
+route.post(
+  "/jobDoneRejected",
+  passport.authenticate("jwt", { session: false }),
+  jobDoneRejected
+);
+route.get(
+  "/getJobByPropId",
+  passport.authenticate("jwt", { session: false }),
+  getJobByPropId
 );
 module.exports = route;

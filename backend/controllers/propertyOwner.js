@@ -35,6 +35,7 @@ const addJob = async (req, res) => {
     const job_id = await addNewJob(owner_id, req.body.property_id);
     const createState = await addUserState(job_id, owner_id);
     const result = await addCategoryDetails(req.body, req.files, job_id);
+    res.json(true);
   } catch (err) {
     console.log(err);
   }
@@ -63,8 +64,15 @@ const selectEstimate = async (req, res) => {
 const getWorkProof = async (req, res) => {
   const job_id = req.query.job_id;
   try {
-    const [result1, result2] = await getWorkProofByJobId(job_id);
-    res.json({ result1: result1, result2: result2 });
+    const [result1, result2, result3, conState, ownerState] =
+      await getWorkProofByJobId(job_id);
+    res.json({
+      result1: result1,
+      result2: result2,
+      result3: result3,
+      conState: conState,
+      ownerState: ownerState,
+    });
   } catch (err) {
     console.log(err);
   }
@@ -86,8 +94,7 @@ const editProperty = async (req, res) => {
 };
 const deleteProperty = async (req, res) => {
   const id = req.query.id;
-  const query =
-    "update properties set deleted_at=current_timestamp(), isDeleted=1 where property_id=?";
+  const query = "delete from properties where property_id=?;";
   const result = await execute(query, [id]);
   res.json(result);
 };
@@ -127,9 +134,31 @@ const getAllMessages = async (req, res) => {
 };
 
 const addComment = async (req, res) => {
-  const { work_proof_id, comment } = req.body;
-  const query = "insert into comments (comment, work_proof_id) values (?,?);";
-  const result = await execute(query, [comment, work_proof_id]);
+  const { work_proof_id, comment, work_image_id } = req.body;
+  const query =
+    "insert into comments (comment, work_proof_id, work_image_id) values (?,?,?);";
+  const result = await execute(query, [comment, work_proof_id, work_image_id]);
+  res.json(result);
+};
+const jobDoneAccepted = async (req, res) => {
+  const job_id = req.body.job_id;
+  const query =
+    "update owner_state set state=2 where job_id=? and isDeleted=0;";
+  const result = await execute(query, [job_id]);
+  res.json(result);
+};
+const jobDoneRejected = async (req, res) => {
+  const job_id = req.body.job_id;
+  const query =
+    "update contractor_state set state=1 where job_id=? and isDeleted=0 ";
+  const result = await execute(query, [job_id]);
+  res.json(result);
+};
+const getJobByPropId = async (req, res) => {
+  const job_id = req.query.property_id;
+  const query = "select * from jobs where property_id=? and isDeleted=0";
+  const result = await execute(query, [job_id]);
+  console.log(result);
   res.json(result);
 };
 module.exports = {
@@ -147,4 +176,7 @@ module.exports = {
   getMessages,
   getAllMessages,
   addComment,
+  jobDoneAccepted,
+  jobDoneRejected,
+  getJobByPropId,
 };

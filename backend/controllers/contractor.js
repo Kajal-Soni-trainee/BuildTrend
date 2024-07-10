@@ -4,6 +4,7 @@ const {
   insertWorkProof,
   showTaskByJobId,
   createState,
+  getWorkProofsWithComments,
 } = require("../services/contractor");
 const addEstimate = async (req, res) => {
   const contractor_id = req.user[0].u_id;
@@ -38,7 +39,7 @@ const sendMsg = async (req, res) => {
 
 const showJobs = async (req, res) => {
   const query =
-    "select * from users inner join (select job_id, properties.property_id, property_name, property_address, properties.owner_id from jobs inner join properties on jobs.property_id=properties.property_id where jobs.isDeleted=0) as a on users.u_id=a.owner_id; ";
+    "select * from owner_state inner join (select * from users inner join (select job_id,contractor_id, properties.property_id, property_name, property_address,  properties.owner_id from jobs inner join properties on jobs.property_id=properties.property_id where jobs.isDeleted=0) as a on users.u_id=a.owner_id) as b on b.job_id=owner_state.job_id; ";
   const result = await execute(query);
   res.json(result);
 };
@@ -75,6 +76,34 @@ const getCategories = async (req, res) => {
   const result = await execute(query, [req.query.job_id]);
   res.json(result);
 };
+
+const getAllWorkProofs = async (req, res) => {
+  const [result1, result2, result3, result4] =
+    await getWorkProofsWithComments();
+  res.json({
+    result1: result1,
+    result2: result2,
+    result3: result3,
+    result4: result4,
+  });
+};
+
+const taskCompletedReq = async (req, res) => {
+  const job_id = req.body.job_id;
+  const contractor_id = req.user[0].u_id;
+  const query =
+    "update contractor_state set state=2 where job_id=? and contractor_id=? and isDeleted=0;";
+  const result = await execute(query, [job_id, contractor_id]);
+  res.json(result);
+};
+
+const selectedJobs = async (req, res) => {
+  const contractor_id = req.user[0].u_id;
+  const query =
+    "select * from contractor_state inner join (select * from users inner join (select job_id,contractor_id, properties.property_id, property_name, property_address,properties.owner_id from jobs inner join properties on jobs.property_id=properties.property_id where jobs.contractor_id=? and jobs.isDeleted=0) as a on users.u_id=a.owner_id) as b on b.job_id=contractor_state.job_id ;";
+  const result = await execute(query, [contractor_id]);
+  res.json(result);
+};
 module.exports = {
   addEstimate,
   addWorkProof,
@@ -84,4 +113,7 @@ module.exports = {
   getContacts,
   getMessages,
   getCategories,
+  getAllWorkProofs,
+  taskCompletedReq,
+  selectedJobs,
 };

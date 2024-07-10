@@ -57,7 +57,7 @@ const addCategoryDetails = async (dataObj, files, job_id) => {
 };
 const getEstimateByJobId = async (job_id) => {
   const query =
-    "select * from users inner join estimates on users.u_id=estimates.contractor_id where estimates.isDeleted=0 and job_id=?;";
+    "select * from jobs inner join (select users.u_name, users.u_email, estimates.estimate_id, estimates.cost,estimates.contractor_id as con_id, estimates.job_id from users inner join estimates on users.u_id=estimates.contractor_id where estimates.isDeleted=0 and job_id=?) as a on a.job_id=jobs.job_id;";
   try {
     const result = await execute(query, [job_id]);
     return result;
@@ -77,7 +77,8 @@ const deleteOthersEstimate = async (estimate_id, job_id) => {
 };
 
 const addJobContractor = async (contractor_id, job_id) => {
-  const query = "update jobs set contractor_id=? where job_id=?;";
+  const query =
+    "update jobs set contractor_id=? where job_id=? and isDeleted=0;";
   try {
     const result = await execute(query, [contractor_id, job_id]);
     return result;
@@ -90,7 +91,7 @@ const updateStates = async (contractor_id, owner_id, job_id) => {
     const jobQuery = "select * from jobs where job_id =?;";
     const jobResult = await execute(jobQuery, [job_id]);
     const ownerStateQuery =
-      "update owner_state set state = 2 where job_id=? and owner_id=? and isDeleted=0;";
+      "update owner_state set state = 1 where job_id=? and owner_id=? and isDeleted=0;";
     const ownerStateResult = await execute(ownerStateQuery, [job_id, owner_id]);
     const contractorStateQuery =
       "update contractor_state set state=1 where job_id=? and contractor_id=? and isDeleted=0;";
@@ -116,7 +117,15 @@ const getWorkProofByJobId = async (job_id) => {
   const result1 = await execute(query1, [job_id]);
   const query2 = "select * from work_proof_images where isDeleted=0;";
   const result2 = await execute(query2);
-  return [result1, result2];
+  const query3 = "select * from comments where isDeleted=0;";
+  const result3 = await execute(query3);
+  const query4 =
+    "select state from contractor_state where job_id=? and isDeleted=0;";
+  const result4 = await execute(query4, [job_id]);
+  const query5 =
+    "select state from owner_state where job_id=? and isDeleted=0;";
+  const result5 = await execute(query5, [job_id]);
+  return [result1, result2, result3, result4[0].state, result5[0].state];
 };
 
 module.exports = {
