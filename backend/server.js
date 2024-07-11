@@ -1,6 +1,8 @@
 const express = require("express");
 const cookie = require("cookie-parser");
 const app = express();
+const http = require("http");
+const server = http.createServer(app);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookie());
@@ -22,6 +24,26 @@ app.use(allowCrossDomain);
 app.use("/", userRoute);
 app.use("/", ownerRoute);
 app.use("/", contractorRoute);
-app.listen(port, () => {
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "http://localhost:8080",
+    credentials: true,
+    methods: ["GET", "POST"],
+    transports: ["websocket", "polling"],
+  },
+  allowEIO4: true,
+});
+io.on("connection", (socket) => {
+  console.log("socket listening");
+  socket.on("sentMsgOwner", (msg) => {
+    console.log("owner sent message", msg);
+    io.emit("receiveMsgOwner", msg);
+  });
+  socket.on("sentMsgContractor", (msg) => {
+    console.log("contractor sent message ", msg);
+    io.emit("receiveMsgContractor", msg);
+  });
+});
+server.listen(port, () => {
   console.log("server is listening at port " + port);
 });

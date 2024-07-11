@@ -18,6 +18,7 @@ const {
   getAllWorkProofs,
   taskCompletedReq,
   selectedJobs,
+  unSelectedJobs,
 } = require("../controllers/contractor");
 route.post(
   "/addEstimate",
@@ -74,5 +75,10 @@ route.get(
   "/selectedJobs",
   passport.authenticate("jwt", { session: false }),
   selectedJobs
+);
+route.get(
+  "/unSelectedJobs",
+  passport.authenticate("jwt", { session: false }),
+  unSelectedJobs
 );
 module.exports = route;

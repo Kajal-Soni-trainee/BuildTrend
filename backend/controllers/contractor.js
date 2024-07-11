@@ -34,7 +34,7 @@ const sendMsg = async (req, res) => {
     job_id,
     message,
   ]);
-  return result;
+  res.json(result);
 };
 
 const showJobs = async (req, res) => {
@@ -45,8 +45,8 @@ const showJobs = async (req, res) => {
 };
 const showTask = async (req, res) => {
   const job_id = req.query.job_id;
-  const result = await showTaskByJobId(job_id);
-  res.json(result);
+  const [categories, images] = await showTaskByJobId(job_id);
+  res.json({ categories: categories, images: images });
 };
 
 const getContacts = async (req, res) => {
@@ -78,8 +78,10 @@ const getCategories = async (req, res) => {
 };
 
 const getAllWorkProofs = async (req, res) => {
-  const [result1, result2, result3, result4] =
-    await getWorkProofsWithComments();
+  const contractor_id = req.user[0].u_id;
+  const [result1, result2, result3, result4] = await getWorkProofsWithComments(
+    contractor_id
+  );
   res.json({
     result1: result1,
     result2: result2,
@@ -100,9 +102,21 @@ const taskCompletedReq = async (req, res) => {
 const selectedJobs = async (req, res) => {
   const contractor_id = req.user[0].u_id;
   const query =
-    "select * from contractor_state inner join (select * from users inner join (select job_id,contractor_id, properties.property_id, property_name, property_address,properties.owner_id from jobs inner join properties on jobs.property_id=properties.property_id where jobs.contractor_id=? and jobs.isDeleted=0) as a on users.u_id=a.owner_id) as b on b.job_id=contractor_state.job_id ;";
+    "select * from contractor_state inner join (select * from users inner join (select job_id,contractor_id, properties.property_id, property_name, property_address,properties.owner_id from jobs inner join properties on jobs.property_id=properties.property_id where jobs.contractor_id=? and jobs.isDeleted=0) as a on users.u_id=a.owner_id) as b on b.job_id=contractor_state.job_id where contractor_state.isDeleted=0 ;";
   const result = await execute(query, [contractor_id]);
   res.json(result);
+};
+
+const unSelectedJobs = async (req, res) => {
+  const contractor_id = req.user[0].u_id;
+  try {
+    const query =
+      "select * from users inner join (select job_id,contractor_id, properties.property_id, property_name, property_address,  properties.owner_id from jobs inner join properties on jobs.property_id=properties.property_id where jobs.isDeleted=0 and (jobs.contractor_id is NULL or jobs.contractor_id=?)) as a on users.u_id=a.owner_id;";
+    const result = await execute(query, [contractor_id]);
+    res.json(result);
+  } catch (err) {
+    console.log(err);
+  }
 };
 module.exports = {
   addEstimate,
@@ -116,4 +130,5 @@ module.exports = {
   getAllWorkProofs,
   taskCompletedReq,
   selectedJobs,
+  unSelectedJobs,
 };

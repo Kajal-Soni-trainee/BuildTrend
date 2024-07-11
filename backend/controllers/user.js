@@ -64,6 +64,7 @@ const forgetPassword = async (req, res) => {
   }
 };
 const logout = async (req, res) => {
+  console.log("object");
   res.clearCookie("token");
   res.json(true);
 };

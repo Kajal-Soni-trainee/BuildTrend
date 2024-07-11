@@ -23,6 +23,7 @@ const {
   jobDoneAccepted,
   jobDoneRejected,
   getJobByPropId,
+  getDistinctSenders,
 } = require("../controllers/propertyOwner");
 route.post(
   "/addProperty",
@@ -105,5 +106,10 @@ route.get(
   "/getJobByPropId",
   passport.authenticate("jwt", { session: false }),
   getJobByPropId
+);
+route.get(
+  "/getDistinctSender",
+  passport.authenticate("jwt", { session: false }),
+  getDistinctSenders
 );
 module.exports = route;

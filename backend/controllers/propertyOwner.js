@@ -111,11 +111,15 @@ const deleteEstimate = async (req, res) => {
   res.json(result);
 };
 const getMessages = async (req, res) => {
-  let owner_id = req.user[0].u_id;
+  const owner_id = req.user[0].u_id;
+  const job_id = req.query.job_id;
+  console.log("owner_id " + owner_id);
+  console.log("job_id " + job_id);
   const query =
-    "with lastMsg as (select sender_id, receiver_id, job_id, max(created_at) as created_at from messages group by sender_id , receiver_id, job_id) select u_name, a.sender_name, a.sender_id, a.receiver_id, a.job_id ,a.message from users inner join ( select u_name as sender_name, lastMsg.sender_id, lastMsg.job_id, lastMsg.receiver_id, message from lastMsg inner join messages on messages.sender_id=lastMsg.sender_id and messages.created_at=lastMsg.created_at inner join users on users.u_id=lastMsg.sender_id) as a on users.u_id=a.receiver_id; ";
-  const result = await execute(query);
-  res.json({ result: result, owner_id: owner_id });
+    "with lastMsg as (select sender_id, max(created_at) as created_at from messages where receiver_id=? and job_id=? group by sender_id) select * from users inner join (select lastMsg.sender_id, lastMsg.created_at, message_id, message from lastMsg inner join messages on messages.sender_id=lastMsg.sender_id and messages.created_at=lastMsg.created_at inner join users on users.u_id=lastMsg.sender_id) as a on a.sender_id=users.u_id ;";
+  const result = await execute(query, [owner_id, job_id]);
+
+  res.json(result);
 };
 
 const getAllMessages = async (req, res) => {
@@ -129,7 +133,7 @@ const getAllMessages = async (req, res) => {
     sender_id,
     receiver_id,
   ]);
-  console.log(result);
+
   res.json(result);
 };
 
@@ -161,6 +165,13 @@ const getJobByPropId = async (req, res) => {
   console.log(result);
   res.json(result);
 };
+
+const getDistinctSenders = async (req, res) => {
+  const job_id = req.query.job_id;
+  const owner_id = req.user[0].u_id;
+  const query =
+    "select distinct sender_id, u_name, job_id from  messages inner join users on users.u_id=messages.sender_id where receiver_id=? and job_id=?;";
+};
 module.exports = {
   addProperty,
   getProperty,
@@ -179,4 +190,5 @@ module.exports = {
   jobDoneAccepted,
   jobDoneRejected,
   getJobByPropId,
+  getDistinctSenders,
 };
