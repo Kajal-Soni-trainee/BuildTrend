@@ -24,6 +24,9 @@ const {
   jobDoneRejected,
   getJobByPropId,
   getDistinctSenders,
+  makePayment,
+  paymentSuccess,
+  paymentFail,
 } = require("../controllers/propertyOwner");
 route.post(
   "/addProperty",
@@ -111,5 +114,20 @@ route.get(
   "/getDistinctSender",
   passport.authenticate("jwt", { session: false }),
   getDistinctSenders
+);
+route.post(
+  "/makePayment",
+  passport.authenticate("jwt", { session: false }),
+  makePayment
+);
+route.post(
+  "/paymentSuccess",
+  passport.authenticate("jwt", { session: false }),
+  paymentSuccess
+);
+route.post(
+  "/paymentFail",
+  passport.authenticate("jwt", { session: false }),
+  paymentFail
 );
 module.exports = route;

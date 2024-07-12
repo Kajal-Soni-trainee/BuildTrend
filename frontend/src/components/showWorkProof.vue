@@ -83,6 +83,20 @@
         </div>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="paymentAlert" width="auto">
+      <v-card class="400px pa-5">
+        <div class="d-flex flex-row justify-center align-center">
+          <v-icon>mdi-credit-card-outline</v-icon>
+        </div>
+        <v-card-title class="text-h4">Make your Payment</v-card-title>
+        <v-card-item class="d-flex flex-row justify-center align-center ga-5">
+          <v-btn @click="makePayment" class="bg-success ma-2">Pay</v-btn>
+          <v-btn @click="paymentAlert = false" class="bg-red ma-2"
+            >Cancel</v-btn
+          >
+        </v-card-item>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 <script setup>
@@ -90,6 +104,8 @@ import { useStore } from "vuex";
 import { useRoute, useRouter } from "vue-router";
 import { computed, onMounted, ref } from "vue";
 import { axiosPost } from "@/services/service";
+import { loadStripe } from "@stripe/stripe-js";
+const stripe = ref(null);
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
@@ -97,6 +113,7 @@ const dialog = ref(false);
 const comment = ref(null);
 const work_proof_id = ref(null);
 const work_image_id = ref(null);
+const paymentAlert = ref(null);
 const popup = ref(false);
 const job_id = ref(route.params.job_id);
 const workProofData = computed(() => {
@@ -115,13 +132,25 @@ const ownerState = computed(() => {
   return store.state.property.currentJobOwnerState;
 });
 async function accepted() {
-  const result = await axiosPost("/jobDoneAccepted", { job_id: job_id.value });
-  console.log(result.data);
-  if (result.status == 200) {
-    await store.dispatch("triggerSetWorkProofs", { job_id: job_id.value });
-    popup.value = false;
-  }
+  popup.value = false;
+  paymentAlert.value = true;
+  // const result = await axiosPost("/jobDoneAccepted", { job_id: job_id.value });
+  // if (result.status == 200) {
+  //   await store.dispatch("triggerSetWorkProofs", { job_id: job_id.value });
+  //   popup.value = false;
+  //   paymentAlert.value = true;
+  // }
 }
+
+async function makePayment() {
+  console.log("making payment");
+  const session = await axiosPost("/makePayment", { job_id: job_id.value });
+  const { error } = await stripe.value.redirectToCheckout({
+    sessionId: session.data.id,
+  });
+  console.log(error);
+}
+
 async function rejected() {
   const result = await axiosPost("/jobDoneRejected", { job_id: job_id.value });
   console.log(result.data);
@@ -131,6 +160,10 @@ async function rejected() {
   }
 }
 onMounted(async () => {
+  console.log(process.env.VUE_APP_PUBLIC_KEY);
+  stripe.value = await loadStripe(
+    "pk_test_51PbaP8JlehMaIxjHdvmBnV8l6Xck9klkPSUuTuwlyXwT1sh2etRbmUT2dMjCbWbfuy24TdZhDIATHH0MyPj2ORZe00pM0fsWBY"
+  );
   await store.dispatch("triggerSetWorkProofs", { job_id: job_id.value });
   console.log(workProofData.value);
   console.log(workProofImage.value);

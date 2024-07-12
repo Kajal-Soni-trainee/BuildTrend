@@ -4,7 +4,8 @@ const actions = {
     const result = await axiosGet(`showTask/?job_id=${payload.job_id}`);
     console.log(result.data);
     commit("SET_CATEGORIES_BY_JOB_ID", { data: result.data.categories });
-    commit("SET_IMAGES_BY_JOB_ID", { data: result.data.images});
+    commit("SET_IMAGES_BY_JOB_ID", { data: result.data.images });
+    commit("SET_ESTIMATECOUNT_BY_JOB_ID", { data: result.data.estimateCount });
   },
   async triggerSetJobs({ commit }) {
     const result = await axiosGet("/showJobs");

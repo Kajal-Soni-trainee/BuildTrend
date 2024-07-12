@@ -40,13 +40,13 @@
       <v-btn
         size="x-large"
         class="text-teal-darken-4"
-        @click="sendEstimate(task[0].job_id)"
+        @click="sendEstimate(categories[0].job_id)"
         >Send</v-btn
       >
     </div>
 
     <div
-      v-if="contractor_id == null"
+      v-if="contractor_id == null && estimateCount == 0"
       class="d-flex flex-row justify-end align-center"
     >
       <v-btn class="bg-teal-darken-4 ma-2" @click="showEstimate = !showEstimate"
@@ -79,6 +79,9 @@ const categories = computed(() => {
 const images = computed(() => {
   return store.state.contractor.imagesByJobId;
 });
+const estimateCount = computed(() => {
+  return store.state.contractor.estimateCount;
+});
 const cost = ref(null);
 onMounted(async () => {
   await store.dispatch("triggerSetTask", { job_id: job_id.value });
@@ -98,6 +101,7 @@ async function sendEstimate(job_id) {
     console.log(result.data);
     alert.value = true;
     showEstimate.value = false;
+    await store.dispatch("triggerSetTask", { job_id: job_id.value });
   }
 }
 </script>

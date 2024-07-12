@@ -10,6 +10,7 @@ const state = {
   workProofCommentsCon: [],
   jobsCon: [],
   unSelectedJobs: [],
+  estimateCount:null
 };
 
 export default state;

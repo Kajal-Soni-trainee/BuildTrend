@@ -43,7 +43,8 @@ const loginUser = async (req, res) => {
         httpOnly: true,
       });
       const role = result[0].u_role;
-      res.json({ token, role });
+      const name = result[0].u_name;
+      res.json({ token, role, name });
     }
   }
 };
@@ -64,7 +65,6 @@ const forgetPassword = async (req, res) => {
   }
 };
 const logout = async (req, res) => {
-  console.log("object");
   res.clearCookie("token");
   res.json(true);
 };

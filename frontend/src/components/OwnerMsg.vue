@@ -70,7 +70,7 @@ async function sendMsg() {
   });
   if (result.status == 200) {
     message.value = null;
-    socket.emit("sendMsgOwner", 1);
+    socket.emit("sentMsg", 1);
     await store.dispatch("triggerSetMsgsByJobId", {
       job_id: job_id.value,
       sender_id: owner_id.value,
@@ -84,13 +84,13 @@ onMounted(async () => {
     sender_id: owner_id.value,
     receiver_id: contractor_id.value,
   });
-  socket.on("receiveMsgContractor", (msg) => {
+  socket.on("receiveMsg", async (msg) => {
     console.log("receiving contractor messge", msg);
-    // await store.dispatch("triggerSetMsgsByJobId", {
-    //   job_id: job_id.value,
-    //   sender_id: owner_id.value,
-    //   receiver_id: contractor_id.value,
-    // });
+    await store.dispatch("triggerSetMsgsByJobId", {
+      job_id: job_id.value,
+      sender_id: owner_id.value,
+      receiver_id: contractor_id.value,
+    });
   });
 });
 </script>

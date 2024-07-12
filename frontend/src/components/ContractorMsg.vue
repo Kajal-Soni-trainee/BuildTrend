@@ -67,7 +67,7 @@ async function sendMsg() {
   });
   if (result.status == 200) {
     message.value = null;
-    socket.emit("sendMsgContractor", 0);
+    socket.emit("sentMsg", 0);
     await store.dispatch("triggerSetMessages", {
       job_id: job_id.value,
       owner_id: owner_id.value,
@@ -80,12 +80,12 @@ onMounted(async () => {
     owner_id: owner_id.value,
   });
 
-  socket.on("receiveMsgOwner", (msg) => {
+  socket.on("receiveMsg", async (msg) => {
     console.log("receiving owner message ", msg);
-    // await store.dispatch("triggerSetMessages", {
-    //   job_id: job_id.value,
-    //   owner_id: owner_id.value,
-    // });
+    await store.dispatch("triggerSetMessages", {
+      job_id: job_id.value,
+      owner_id: owner_id.value,
+    });
   });
 });
 </script>

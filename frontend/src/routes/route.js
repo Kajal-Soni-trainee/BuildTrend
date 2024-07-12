@@ -105,6 +105,18 @@ const routes = [
     path: "/workProofs",
     meta: { requiredAuth: true },
   },
+  {
+    name: "PaymentSuccess",
+    component: () => import("../components/PaymentSuccess.vue"),
+    path: "/success",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "PaymentFailure",
+    component: () => import("../components/PaymentFailure.vue"),
+    path: "/error",
+    meta: { requiredAuth: true },
+  },
 ];
 
 const router = createRouter({

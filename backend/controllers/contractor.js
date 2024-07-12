@@ -45,8 +45,17 @@ const showJobs = async (req, res) => {
 };
 const showTask = async (req, res) => {
   const job_id = req.query.job_id;
-  const [categories, images] = await showTaskByJobId(job_id);
-  res.json({ categories: categories, images: images });
+  const contractor_id = req.user[0].u_id;
+  const [categories, images, estimateCount] = await showTaskByJobId(
+    job_id,
+    contractor_id
+  );
+  console.log(estimateCount);
+  res.json({
+    categories: categories,
+    images: images,
+    estimateCount: estimateCount,
+  });
 };
 
 const getContacts = async (req, res) => {
@@ -93,9 +102,11 @@ const getAllWorkProofs = async (req, res) => {
 const taskCompletedReq = async (req, res) => {
   const job_id = req.body.job_id;
   const contractor_id = req.user[0].u_id;
+  console.log(job_id, contractor_id);
   const query =
     "update contractor_state set state=2 where job_id=? and contractor_id=? and isDeleted=0;";
   const result = await execute(query, [job_id, contractor_id]);
+  console.log(result);
   res.json(result);
 };
 

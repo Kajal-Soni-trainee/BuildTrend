@@ -14,7 +14,7 @@
           :key="workproof.work_proof_id"
         >
           <v-card-item v-if="workproof.job_id == job.job_id">
-            <v-card-title class="text-h4 text-teal-darken-4">{{
+            <v-card-title class="text-h4 text-teal-darken-4"><b>Name: </b>{{
               workproof.title
             }}</v-card-title>
             <div
@@ -60,8 +60,8 @@
             <v-btn
               v-if="job.state != 2"
               class="text-h5 bg-teal-darken-4 rounded-xl ma-5"
-              @click="alert = true"
-              >Have completed ?</v-btn
+              @click="setJob(job.job_id)"
+              >Have completed ?{{ job.job_id }}</v-btn
             >
           </div>
           <v-dialog v-model="alert" width="auto">
@@ -72,9 +72,7 @@
               title="Are you sure you have complted the Job"
             >
               <div class="d-flex flex-row justify-center align-center ga-5">
-                <v-btn @click="completedTask(job.job_id)" variant="outlined"
-                  >Yes</v-btn
-                >
+                <v-btn @click="completedTask" variant="outlined">Yes</v-btn>
                 <v-btn @click="alert = false" variant="outlined">No</v-btn>
               </div>
             </v-card>
@@ -102,14 +100,22 @@ const workProofComments = computed(() => {
 const jobs = computed(() => {
   return store.state.contractor.jobsCon;
 });
-
-async function completedTask(job_id) {
-  const result = await axiosPost("/workCompletedReq", { job_id: job_id });
+const currentJobId = ref(null);
+function setJob(job_id) {
+  currentJobId.value = job_id;
+  alert.value = true;
+}
+async function completedTask() {
+  console.log(currentJobId.value);
+  const result = await axiosPost("/workCompletedReq", {
+    job_id: currentJobId.value,
+  });
   if (result.status == 200) {
     alert.value = false;
     await store.dispatch("triggerSetWorkProofsCon");
   }
 }
+
 onMounted(async () => {
   await store.dispatch("triggerSetWorkProofsCon");
   console.log("details", workProofDetails.value);

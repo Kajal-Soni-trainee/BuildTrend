@@ -20,9 +20,9 @@
             @click="viewTask(item.job_id, item.contractor_id)"
             >View Task</v-btn
           >
-          <v-btn class="bg-teal-darken-4 mx-2" @click="dialog = true"
+          <!-- <v-btn class="bg-teal-darken-4 mx-2" @click="dialog = true"
             >Send Message</v-btn
-          >
+          > -->
           <v-btn
             class="bg-teal-darken-4 mx-2"
             @click="openChat(item.job_id, item.owner_id, item.u_name)"

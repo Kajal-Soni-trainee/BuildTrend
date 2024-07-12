@@ -39,7 +39,9 @@
             variant="solo-filled"
             label="Role"
             v-model="userData.role"
-            :items="[0, 1]"
+            :items="roleItems"
+            item-title="roleText"
+            item-value="roleValue"
             :error-messages="v$.role.$errors.map((e) => e.$message)"
             @blur="v$.role.$touch"
           >
@@ -111,10 +113,10 @@ import {
 const showPass = ref(false);
 const showConfirmPass = ref(false);
 const router = useRouter();
-// const roleItem = ref([
-//   { label: "Contractor", value: 1 },
-//   { label: "Property Owner", value: 0 },
-// ]);
+const roleItems = ref([
+  { roleText: "Contractor", roleValue: 1 },
+  { roleText: "Property Owner", roleValue: 0 },
+]);
 const userData = reactive({
   name: null,
   email: null,

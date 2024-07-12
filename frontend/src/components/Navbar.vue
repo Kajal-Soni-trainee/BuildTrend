@@ -4,10 +4,8 @@
     <v-list-item v-if="role == 0" link to="/addProperty"
       >Add Property</v-list-item
     >
-    <v-list-item v-if="role == 0" link to="/contactList">Contacts</v-list-item>
     <v-list-item v-if="role == 0" link to="/jobs">Jobs</v-list-item>
     <v-list-item v-if="role == 1" link to="/showJobs">Show Jobs</v-list-item>
-    <v-list-item v-if="role == 1" link to="/contacts">Contacts</v-list-item>
     <v-list-item v-if="role == 1" link to="/addWorkProof"
       >Add WorkProof</v-list-item
     >
@@ -27,12 +25,13 @@ const role = computed(() => {
   return store.state.users.role;
 });
 async function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("role_id");
+  localStorage.removeItem("name");
+  store.commit("RESET_AUTH");
   const result = await axiosGet("/logout");
   if (result.status == 200) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role_id");
-    store.commit("RESET_AUTH");
-    router.replace({ name: "Login" });
+    router.push({ name: "Login" });
   }
 }
 </script>

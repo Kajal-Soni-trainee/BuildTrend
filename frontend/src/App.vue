@@ -1,11 +1,11 @@
 <template>
   <v-app v-if="isLoggedIn">
     <v-app-bar class="bg-teal-darken-4" prepend-icon="" title="Build Trend">
+      <p class="text-h5"><b>{{ name }}</b></p>
       <template v-slot:prepend>
         <v-app-bar-nav-icon></v-app-bar-nav-icon>
       </template>
       <v-menu>
-        
         <template v-slot:activator="{ prop }">
           <v-btn v-bind="prop" icon="mdi-dots-vertical"></v-btn>
         </template>
@@ -39,11 +39,15 @@ const store = useStore();
 const isLoggedIn = computed(() => {
   return store.state.users.isLoggedIn;
 });
+const name = computed(() => {
+  return store.state.users.name;
+});
 onMounted(() => {
   if (localStorage.getItem("token")) {
     store.commit("SET_AUTH", {
       token: localStorage.getItem("token"),
       role: localStorage.getItem("role_id"),
+      name: localStorage.getItem("name"),
     });
   }
 });

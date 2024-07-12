@@ -1,4 +1,6 @@
 const { execute } = require("../dbConnections/executeQuery");
+console.log(process.env.STRIPE_SECRET_KEY);
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const {
   addNewJob,
   addCategoryDetails,
@@ -9,6 +11,10 @@ const {
   addJobContractor,
   updateStates,
   getWorkProofByJobId,
+  getEstimatedCost,
+  paymentEntry,
+  deleteJobFromEveryWhere,
+  deleteOthersMsg,
 } = require("../services/owner");
 const addProperty = async (req, res) => {
   const { name, address } = req.body;
@@ -57,6 +63,8 @@ const selectEstimate = async (req, res) => {
     const result1 = await deleteOthersEstimate(estimate_id, job_id);
     const result2 = await addJobContractor(contractor_id, job_id);
     const result3 = await updateStates(contractor_id, owner_id, job_id);
+    const result4 = await deleteOthersMsg(contractor_id, owner_id, job_id);
+    res.json(result1);
   } catch (err) {
     console.log(err);
   }
@@ -116,7 +124,7 @@ const getMessages = async (req, res) => {
   console.log("owner_id " + owner_id);
   console.log("job_id " + job_id);
   const query =
-    "with lastMsg as (select sender_id, max(created_at) as created_at from messages where receiver_id=? and job_id=? group by sender_id) select * from users inner join (select lastMsg.sender_id, lastMsg.created_at, message_id, message from lastMsg inner join messages on messages.sender_id=lastMsg.sender_id and messages.created_at=lastMsg.created_at inner join users on users.u_id=lastMsg.sender_id) as a on a.sender_id=users.u_id ;";
+    "with lastMsg as (select sender_id, max(created_at) as created_at from messages where receiver_id=? and job_id=? and isDeleted=0 group by sender_id ) select * from users inner join (select lastMsg.sender_id, lastMsg.created_at, message_id, message from lastMsg inner join messages on messages.sender_id=lastMsg.sender_id and messages.created_at=lastMsg.created_at inner join users on users.u_id=lastMsg.sender_id) as a on a.sender_id=users.u_id ;";
   const result = await execute(query, [owner_id, job_id]);
 
   res.json(result);
@@ -172,6 +180,60 @@ const getDistinctSenders = async (req, res) => {
   const query =
     "select distinct sender_id, u_name, job_id from  messages inner join users on users.u_id=messages.sender_id where receiver_id=? and job_id=?;";
 };
+
+const makePayment = async (req, res) => {
+  const job_id = req.body.job_id;
+  try {
+    const amount = await getEstimatedCost(job_id);
+    console.log(job_id, amount);
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "inr",
+            product_data: {
+              name: "Job",
+            },
+            unit_amount: amount * 100,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: `http://localhost:8080/success?job_id=${job_id}`,
+      cancel_url: `http://localhost:8080/error?job_id=${job_id}`,
+    });
+
+    const session_id = session.id;
+    const result = await paymentEntry(session_id, job_id, amount);
+    res.json({ id: session_id });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const paymentSuccess = async (req, res) => {
+  const job_id = req.body.job_id;
+  try {
+    const updateStatusQuery = "update payments set status=1 where job_id=?;";
+    const updateStatus = await execute(updateStatusQuery, [job_id]);
+    const deleteResult = await deleteJobFromEveryWhere(job_id);
+  } catch (err) {
+    console.log(err);
+  }
+};
+const paymentFail = async (req, res) => {
+  const job_id = req.body.job_id;
+  try {
+    const query =
+      "update payments set deleted_at=current_timestamp(), isDeleted=1 where job_id=?;";
+    const result = await execute(query, [job_id]);
+    res.json(result);
+  } catch (err) {
+    console.log(err);
+  }
+};
 module.exports = {
   addProperty,
   getProperty,
@@ -191,4 +253,7 @@ module.exports = {
   jobDoneRejected,
   getJobByPropId,
   getDistinctSenders,
+  makePayment,
+  paymentSuccess,
+  paymentFail,
 };

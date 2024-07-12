@@ -35,5 +35,8 @@ const mutations = {
   SET_IMAGES_BY_JOB_ID(state, payload) {
     state.imagesByJobId = payload.data;
   },
+  SET_ESTIMATECOUNT_BY_JOB_ID(state, payload) {
+    state.estimateCount = payload.data;
+  },
 };
 export default mutations;
