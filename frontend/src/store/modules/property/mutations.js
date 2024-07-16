@@ -29,5 +29,9 @@ const mutations = {
   SET_CUR_JOB_OWNER_STATE(state, payload) {
     state.currentJobOwnerState = payload.data;
   },
+
+  SET_ALL_CONTRACTORS(state, payload) {
+    state.allContractors = payload.data;
+  },
 };
 export default mutations;

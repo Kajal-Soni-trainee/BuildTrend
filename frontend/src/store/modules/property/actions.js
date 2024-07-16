@@ -6,7 +6,7 @@ const actions = {
     commit("SET_PROPERITES", { property: property.data });
   },
   async triggerSetJobs({ commit }) {
-    const result = await axiosGet("/showJobs");
+    const result = await axiosGet("/showJobsByOwnerId");
     commit("SET_JOBS", { data: result.data });
   },
   async triggerSetEstimates({ commit }, payload) {
@@ -35,6 +35,14 @@ const actions = {
     commit("SET_WORK_PROOF_COMMENTS", { data: result.data.result3 });
     commit("SET_CUR_JOB_CON_STATE", { data: result.data.conState });
     commit("SET_CUR_JOB_OWNER_STATE", { data: result.data.ownerState });
+  },
+  async triggerSetAllContractors({ commit }, payload) {
+    const result = await axiosGet(
+      `/getAllContractors/?job_id=${payload.job_id}`
+    );
+    if (result.status == 200) {
+      commit("SET_ALL_CONTRACTORS", { data: result.data });
+    }
   },
 };
 export default actions;

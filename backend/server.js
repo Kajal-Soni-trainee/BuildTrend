@@ -13,6 +13,7 @@ const port = process.env.PORT;
 const userRoute = require("./routes/user");
 const ownerRoute = require("./routes/owner");
 const contractorRoute = require("./routes/contractor");
+const archiveRoute = require("./routes/archiveJobs");
 const cors = require("cors");
 var allowCrossDomain = function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "http://localhost:8080");
@@ -25,6 +26,7 @@ app.use(allowCrossDomain);
 app.use("/", userRoute);
 app.use("/", ownerRoute);
 app.use("/", contractorRoute);
+app.use("/", archiveRoute);
 const io = require("socket.io")(server, {
   cors: {
     origin: "*",

@@ -30,7 +30,10 @@
             <b>Job Status: </b><span class="text-success">Completed</span>
           </p></v-card-item
         >
-        <v-btn class="bg-teal-darken-4 ma-5" @click="getCategories(item.job_id)"
+        <v-btn
+          v-if="item.state != 2"
+          class="bg-teal-darken-4 ma-5"
+          @click="getCategories(item.job_id)"
           >Add Proof</v-btn
         >
         <v-dialog v-model="dialog" width="auto">

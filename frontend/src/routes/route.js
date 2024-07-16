@@ -117,6 +117,36 @@ const routes = [
     path: "/error",
     meta: { requiredAuth: true },
   },
+  {
+    name: "Profile",
+    component: () => import("../components/profile.vue"),
+    path: "/profile",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "ArchivedJobOwner",
+    component: () => import("../components/ArchivedJobOwner.vue"),
+    path: "/archivedJobsOfOwner",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "ArchivedJobContractor",
+    component: () => import("../components/ArchivedJobContractor.vue"),
+    path: "/archivedJobOfContractor",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "ArchivedJobTask",
+    component: () => import("../components/ArchivedJobTask.vue"),
+    path: "/archivedTask",
+    meta: { requiredAuth: true },
+  },
+  {
+    name: "ArchivedJobProof",
+    component: () => import("../components/ArchivedJobProof.vue"),
+    path: "/archivedProof",
+    meta: { requiredAuth: true },
+  },
 ];
 
 const router = createRouter({

@@ -27,6 +27,9 @@ const {
   makePayment,
   paymentSuccess,
   paymentFail,
+  showJobsByOwnerId,
+  showAllContractors,
+  getContractorId,
 } = require("../controllers/propertyOwner");
 route.post(
   "/addProperty",
@@ -129,5 +132,21 @@ route.post(
   "/paymentFail",
   passport.authenticate("jwt", { session: false }),
   paymentFail
+);
+route.get(
+  "/showJobsByOwnerId",
+  passport.authenticate("jwt", { session: false }),
+  showJobsByOwnerId
+);
+
+route.get(
+  "/getAllContractors",
+  passport.authenticate("jwt", { session: false }),
+  showAllContractors
+);
+route.get(
+  "/getContractorId",
+  passport.authenticate("jwt", { session: false }),
+  getContractorId
 );
 module.exports = route;

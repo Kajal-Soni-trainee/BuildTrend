@@ -14,9 +14,11 @@
       >
       <div max-width="800px" class="scroll d-flex flex-row justify-start ma-5">
         <template v-for="image in workProofImage" :key="image.work_image_id">
-          <div class="d-flex flex-column align-center pa-5 ma-5">
+          <div
+            v-if="image.work_proof_id == item.work_proof_id"
+            class="d-flex flex-column align-center pa-5 ma-5"
+          >
             <v-img
-              v-if="image.work_proof_id == item.work_proof_id"
               :src="'http://localhost:8000' + image.image"
               :alt="image.image"
               height="200"
@@ -40,7 +42,6 @@
           </div>
         </template>
       </div>
-
       <v-dialog v-model="dialog" width="auto">
         <v-card width="600px" class="pa-5">
           <v-text-field

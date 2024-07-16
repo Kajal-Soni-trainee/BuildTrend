@@ -61,8 +61,8 @@ const createState = async (job_id, contractor_id) => {
 };
 const getWorkProofsWithComments = async (contractor_id) => {
   const query1 =
-    "select * from jobs inner join (select work_proofs.job_id, jobs_categories.title, work_proofs.work_proof_id, work_proofs.job_category_id, work_proofs.description from work_proofs inner join jobs_categories on work_proofs.job_category_id=jobs_categories.job_category_id where jobs_categories.isDeleted=0 and work_proofs.isDeleted=0) as a on a.job_id=jobs.job_id where jobs.contractor_id=? and jobs.isDeleted=0; ";
-  const result1 = await execute(query1, [contractor_id]);
+    "select * from owner_state inner join (select state as contractor_state ,b.job_id, b.title, b.work_proof_id, b.job_category_id, b.description from contractor_state inner join (select work_proofs.job_id, jobs_categories.title, work_proofs.work_proof_id,   work_proofs.job_category_id,  work_proofs.description from work_proofs inner join jobs_categories on work_proofs.job_category_id=jobs_categories.job_category_id where jobs_categories.isDeleted=0 and work_proofs.isDeleted=0)  as b on b.job_id=contractor_state.job_id where contractor_state.isDeleted=0) as c on owner_state.job_id=c.job_id where owner_state.isDeleted=0; ";
+  const result1 = await execute(query1);
   const query2 = "select * from work_proof_images where isDeleted=0;";
   const result2 = await execute(query2);
   const query3 =
@@ -72,10 +72,58 @@ const getWorkProofsWithComments = async (contractor_id) => {
   const result4 = await execute(query4);
   return [result1, result2, result3, result4];
 };
+
+const deleteJobFromEveryWhere = async (job_id) => {
+  try {
+    const query1 =
+      "update jobs set isDeleted=1, deleted_at=current_timestamp() where job_id=?;";
+    const result1 = await execute(query1, [job_id]);
+    const query2 =
+      "update jobs_categories set isDeleted=1, deleted_at=current_timestamp() where job_id=?;";
+    const result2 = await execute(query2, [job_id]);
+    const query3 =
+      "update owner_state set isDeleted=1, deleted_at=current_timestamp() where job_id=?;";
+    const result3 = await execute(query3, [job_id]);
+    const query4 =
+      "update contractor_state set isDeleted=1, deleted_at=current_timestamp() where job_id=?;";
+    const result4 = await execute(query4, [job_id]);
+    const query5 =
+      "update messages set isDeleted=1 , deleted_at=current_timestamp() where job_id=? ;";
+    const result5 = await execute(query5, [job_id]);
+    const query6 =
+      "update work_proofs set deleted_at=current_timestamp(), isDeleted=1 where job_id=?;";
+    const result6 = await execute(query6, [job_id]);
+    const allWorkProof = "select * from work_proofs where job_id=?;";
+    const allProofs = await execute(allWorkProof, [job_id]);
+    allProofs.forEach(async (element) => {
+      const deleteProofImgQuery =
+        "update work_proof_images set isDeleted=1, deleted_at=current_timestamp() where work_proof_id=?; ";
+      const deleteProofImg = await execute(
+        deleteProofImgQuery,
+        element.work_proof_id
+      );
+    });
+    const allImagesQuery = "select * from jobs_categories where job_id=?;";
+    const allImgResult = await execute(allImagesQuery, [job_id]);
+    allImgResult.forEach(async (element) => {
+      const deleteImgQuery =
+        "update job_category_images set isDeleted=1 , deleted_at=current_timestamp() where job_category_id=?; ";
+      const deleteResult = await execute(
+        deleteImgQuery,
+        element.job_category_id
+      );
+    });
+    return true;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 module.exports = {
   createEstimate,
   insertWorkProof,
   showTaskByJobId,
   createState,
   getWorkProofsWithComments,
+  deleteJobFromEveryWhere,
 };

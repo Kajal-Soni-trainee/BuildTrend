@@ -10,6 +10,7 @@ const state = {
   workProofComments: [],
   currentJobConState: null,
   currentJobOwnerState: null,
+  allContractors: [],
 };
 
 export default state;

@@ -101,10 +101,62 @@ const editProperty = async (req, res) => {
   res.json(result);
 };
 const deleteProperty = async (req, res) => {
-  const id = req.query.id;
-  const query = "delete from properties where property_id=?;";
-  const result = await execute(query, [id]);
-  res.json(result);
+  try {
+    const id = req.query.id;
+    console.log(id);
+    const query =
+      "update properties set isDeleted=1 , deleted_at=current_timestamp() where property_id=?;";
+    const result = await execute(query, [id]);
+    const query1 =
+      "update jobs set isDeleted=1, deleted_at=current_timestamp() where property_id=?;";
+    const result1 = await execute(query1, [id]);
+    const allJobsQuery =
+      "select * from jobs where property_id=? and isDeleted=1;";
+    const allJobs = await execute(allJobsQuery, [id]);
+    allJobs.forEach(async (element) => {
+      const query2 =
+        "update jobs set isDeleted=1, deleted_at=current_timestamp() where job_id=?;";
+      const result2 = await execute(query1, [element.job_id]);
+      const query3 =
+        "update jobs_categories set isDeleted=1, deleted_at=current_timestamp() where job_id=?;";
+      const result3 = await execute(query2, [element.job_id]);
+      const query4 =
+        "update owner_state set isDeleted=1, deleted_at=current_timestamp() where job_id=?;";
+      const result4 = await execute(query3, [element.job_id]);
+      const query5 =
+        "update contractor_state set isDeleted=1, deleted_at=current_timestamp() where job_id=?;";
+      const result5 = await execute(query4, [element.job_id]);
+      const query6 =
+        "update messages set isDeleted=1 , deleted_at=current_timestamp() where job_id=? ;";
+      const result6 = await execute(query5, [element.job_id]);
+      const query7 =
+        "update work_proofs set deleted_at=current_timestamp(), isDeleted=1 where job_id=?;";
+      const result7 = await execute(query6, [element.job_id]);
+      const allWorkProof = "select * from work_proofs where job_id=?;";
+      const allProofs = await execute(allWorkProof, [element.job_id]);
+      allProofs.forEach(async (element1) => {
+        const deleteProofImgQuery =
+          "update work_proof_images set isDeleted=1, deleted_at=current_timestamp() where work_proof_id=?; ";
+        const deleteProofImg = await execute(
+          deleteProofImgQuery,
+          element1.work_proof_id
+        );
+      });
+      const allImagesQuery = "select * from jobs_categories where job_id=?;";
+      const allImgResult = await execute(allImagesQuery, [element.job_id]);
+      allImgResult.forEach(async (element2) => {
+        const deleteImgQuery =
+          "update job_category_images set isDeleted=1 , deleted_at=current_timestamp() where job_category_id=?; ";
+        const deleteResult = await execute(
+          deleteImgQuery,
+          element2.job_category_id
+        );
+      });
+    });
+    res.json(true);
+  } catch (err) {
+    console.log(err);
+  }
 };
 const getPropertyById = async (req, res) => {
   const property_id = req.query.id;
@@ -123,11 +175,20 @@ const getMessages = async (req, res) => {
   const job_id = req.query.job_id;
   console.log("owner_id " + owner_id);
   console.log("job_id " + job_id);
-  const query =
-    "with lastMsg as (select sender_id, max(created_at) as created_at from messages where receiver_id=? and job_id=? and isDeleted=0 group by sender_id ) select * from users inner join (select lastMsg.sender_id, lastMsg.created_at, message_id, message from lastMsg inner join messages on messages.sender_id=lastMsg.sender_id and messages.created_at=lastMsg.created_at inner join users on users.u_id=lastMsg.sender_id) as a on a.sender_id=users.u_id ;";
-  const result = await execute(query, [owner_id, job_id]);
-
-  res.json(result);
+  const checkContractor = "select * from jobs where job_id=? and isDeleted=0;";
+  const contractorResult = await execute(checkContractor, [job_id]);
+  const contractor_id = contractorResult[0].contractor_id;
+  if (contractor_id == null) {
+    const query =
+      "with lastMsg as (select sender_id, max(created_at) as created_at from messages where receiver_id=? and job_id=? and isDeleted=0 group by sender_id ) select * from users inner join (select lastMsg.sender_id, lastMsg.created_at, message_id, message from lastMsg inner join messages on messages.sender_id=lastMsg.sender_id and messages.created_at=lastMsg.created_at inner join users on users.u_id=lastMsg.sender_id) as a on a.sender_id=users.u_id ;";
+    const result = await execute(query, [owner_id, job_id]);
+    res.json(result);
+  } else {
+    const query =
+      "with lastMsg as (select sender_id, max(created_at) as created_at from messages where receiver_id=? and job_id=? and isDeleted=0 group by sender_id having sender_id=?) select * from users inner join (select lastMsg.sender_id, lastMsg.created_at, message_id, message from lastMsg inner join messages on messages.sender_id=lastMsg.sender_id and messages.created_at=lastMsg.created_at inner join users on users.u_id=lastMsg.sender_id) as a on a.sender_id=users.u_id ;";
+    const result = await execute(query, [owner_id, job_id, contractor_id]);
+    res.json(result);
+  }
 };
 
 const getAllMessages = async (req, res) => {
@@ -215,10 +276,15 @@ const makePayment = async (req, res) => {
 
 const paymentSuccess = async (req, res) => {
   const job_id = req.body.job_id;
+  const owner_id = req.user[0].u_id;
   try {
     const updateStatusQuery = "update payments set status=1 where job_id=?;";
     const updateStatus = await execute(updateStatusQuery, [job_id]);
-    const deleteResult = await deleteJobFromEveryWhere(job_id);
+    const updateOwnerStatus =
+      "update owner_state set state=2 where owner_id=? and isDeleted=0;";
+    const ownerStateResult = await execute(updateOwnerStatus, [owner_id]);
+    //  const deleteResult = await deleteJobFromEveryWhere(job_id);
+    res.json(true);
   } catch (err) {
     console.log(err);
   }
@@ -230,6 +296,36 @@ const paymentFail = async (req, res) => {
       "update payments set deleted_at=current_timestamp(), isDeleted=1 where job_id=?;";
     const result = await execute(query, [job_id]);
     res.json(result);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const showJobsByOwnerId = async (req, res) => {
+  const owner_id = req.user[0].u_id;
+  const query =
+    "select * from owner_state inner join (select * from users inner join (select job_id,contractor_id, properties.property_id, property_name, property_address,  properties.owner_id from jobs inner join properties on jobs.property_id=properties.property_id where jobs.owner_id=? and jobs.isDeleted=0) as a on users.u_id=a.owner_id) as b on b.job_id=owner_state.job_id; ";
+  const result = await execute(query, [owner_id]);
+  res.json(result);
+};
+
+const showAllContractors = async (req, res) => {
+  const job_id = req.query.job_id;
+  const owner_id = req.user[0].u_id;
+  try {
+    const query = "select * from users where u_role=1 and isDeleted=0;";
+    const result = await execute(query);
+    res.json(result);
+  } catch (err) {
+    console.log(err);
+  }
+};
+const getContractorId = async (req, res) => {
+  const job_id = req.query.job_id;
+  try {
+    const query = "select * from jobs where job_id=? and isDeleted=0;";
+    const result = await execute(query, [job_id]);
+    res.json({ contractor_id: result[0].contractor_id });
   } catch (err) {
     console.log(err);
   }
@@ -256,4 +352,7 @@ module.exports = {
   makePayment,
   paymentSuccess,
   paymentFail,
+  showJobsByOwnerId,
+  showAllContractors,
+  getContractorId,
 };

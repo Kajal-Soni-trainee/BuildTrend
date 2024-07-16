@@ -44,7 +44,8 @@ const loginUser = async (req, res) => {
       });
       const role = result[0].u_role;
       const name = result[0].u_name;
-      res.json({ token, role, name });
+      const img = result[0].u_img;
+      res.json({ token, role, name, img });
     }
   }
 };
@@ -68,4 +69,50 @@ const logout = async (req, res) => {
   res.clearCookie("token");
   res.json(true);
 };
-module.exports = { registerUser, loginUser, forgetPassword, logout };
+const getUserDetails = async (req, res) => {
+  const user_id = req.user[0].u_id;
+  try {
+    const query = "select * from users where u_id=?; ";
+    const result = await execute(query, [user_id]);
+    res.json(result);
+  } catch (err) {
+    console.log(err);
+  }
+};
+const addImg = async (req, res) => {
+  try {
+    const imgPath = "/uploads/" + req.file.filename;
+    const query = "update users set u_img=? where u_id=?;";
+    const result = await execute(query, [imgPath, req.body.user_id]);
+    res.json(result);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const updateUser = async (req, res) => {
+  const { u_name, u_email, u_address, u_contact, u_id } = req.body;
+  try {
+    const query =
+      "update users set u_name=?, u_email=?, u_contact=?, u_address=? where u_id=?;";
+    const result = await execute(query, [
+      u_name,
+      u_email,
+      u_contact,
+      u_address,
+      u_id,
+    ]);
+    res.json(result);
+  } catch (err) {
+    console.log(err);
+  }
+};
+module.exports = {
+  registerUser,
+  loginUser,
+  forgetPassword,
+  logout,
+  getUserDetails,
+  addImg,
+  updateUser,
+};

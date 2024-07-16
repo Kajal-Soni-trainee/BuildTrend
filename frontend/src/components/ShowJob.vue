@@ -25,7 +25,9 @@
           > -->
           <v-btn
             class="bg-teal-darken-4 mx-2"
-            @click="openChat(item.job_id, item.owner_id, item.u_name)"
+            @click="
+              openChat(item.job_id, item.owner_id, item.u_name, item.u_img)
+            "
             >Open Chat</v-btn
           >
           <v-dialog v-model="dialog" width="auto">
@@ -96,10 +98,10 @@ async function sendMsg(job_id, receiver_id) {
   }
 }
 
-function openChat(job_id, owner_id, u_name) {
+function openChat(job_id, owner_id, u_name, u_img) {
   router.push({
     name: "ContractorMsg",
-    query: { job_id: job_id, owner_id: owner_id, u_name: u_name },
+    query: { job_id: job_id, owner_id: owner_id, u_name: u_name, u_img: u_img },
   });
 }
 const propertyData = computed(() => {

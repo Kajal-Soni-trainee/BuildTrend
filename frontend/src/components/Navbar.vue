@@ -12,27 +12,34 @@
     <v-list-item v-if="role == 1" link to="/workProofs"
       >Work Proofs</v-list-item
     >
+    <v-list-item v-if="role == 0" link to="/archivedJobsOfOwner"
+      >Archived Jobs</v-list-item
+    >
+    <v-list-item v-if="role == 1" link to="/archivedJobOfContractor"
+      >Archived Jobs</v-list-item
+    >
+    <v-list-item @click="profile" link to="/profile">My Profile</v-list-item>
     <v-list-item @click="logout">Logout</v-list-item>
   </v-navigation-drawer>
 </template>
 <script setup>
 import { useStore } from "vuex";
 import { computed } from "vue";
-import { axiosGet } from "../services/service";
-import router from "@/routes/route";
+//import { axiosGet } from "../services/service";
+import { useRouter } from "vue-router";
 const store = useStore();
+const router = useRouter();
 const role = computed(() => {
   return store.state.users.role;
 });
 async function logout() {
+  router.push({ name: "Login" });
   localStorage.removeItem("token");
   localStorage.removeItem("role_id");
   localStorage.removeItem("name");
   store.commit("RESET_AUTH");
-  const result = await axiosGet("/logout");
-  if (result.status == 200) {
-    router.push({ name: "Login" });
-  }
+  // const result = await axiosGet("/logout");
+  // console.log(result);
 }
 </script>
 <style scoped></style>

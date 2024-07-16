@@ -5,6 +5,7 @@ const {
   showTaskByJobId,
   createState,
   getWorkProofsWithComments,
+  deleteJobFromEveryWhere
 } = require("../services/contractor");
 const addEstimate = async (req, res) => {
   const contractor_id = req.user[0].u_id;
@@ -129,6 +130,16 @@ const unSelectedJobs = async (req, res) => {
     console.log(err);
   }
 };
+
+const archiveJob = async (req, res) => {
+  const job_id = req.body.job_id;
+  try {
+    const deleteResult = await deleteJobFromEveryWhere(job_id);
+    res.json(deleteResult);
+  } catch (err) {
+    console.log(err);
+  }
+};
 module.exports = {
   addEstimate,
   addWorkProof,
@@ -142,4 +153,5 @@ module.exports = {
   taskCompletedReq,
   selectedJobs,
   unSelectedJobs,
+  archiveJob,
 };

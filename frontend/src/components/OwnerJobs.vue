@@ -1,7 +1,7 @@
 <template>
   <v-container class="d-flex flex-row justify-center align-center">
     <p v-if="propertyData.length == 0" class="text-red text-h2 text-center">
-      No Property Added
+      No Jobs Added
     </p>
     <div class="d-flex flex-column justify-center align-center ga-5" v-else>
       <v-card
@@ -50,6 +50,12 @@
             <span class="text-h6 text-warning">In Progress</span>
           </p></v-card-item
         >
+        <v-card-item v-if="item.state == 2"
+          ><p>
+            <b>Status:</b>
+            <span class="text-h6 text-success">Completed</span>
+          </p></v-card-item
+        >
       </v-card>
     </div>
   </v-container>
@@ -66,7 +72,7 @@ const propertyData = computed(() => {
 
 onMounted(async () => {
   store.dispatch("triggerSetJobs");
-  console.log(propertyData);
+  console.log(propertyData.value);
 });
 
 function showWorkProofs(job_id) {

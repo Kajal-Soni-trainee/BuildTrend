@@ -24,9 +24,6 @@
             @click="accept(item.estimate_id, item.con_id, item.job_id)"
             >Accept</v-btn
           >
-          <v-btn class="mx-2 bg-red-darken-4" @click="reject(item.estimate_id)"
-            >Reject</v-btn
-          >
         </v-card-item>
         <v-dialog v-model="acceptAlert" width="auto">
           <v-card>
@@ -41,19 +38,6 @@
             >
           </v-card>
         </v-dialog>
-        <v-dialog v-model="rejectAlert" width="auto">
-          <v-card>
-            <v-card-title
-              >You rejected {{ item.u_name }} estimation</v-card-title
-            >
-            <v-btn
-              @click="rejectAlert = false"
-              class="float-right"
-              variant="outlined"
-              >Ok</v-btn
-            >
-          </v-card>
-        </v-dialog>
       </v-card>
     </div>
   </template>
@@ -62,12 +46,11 @@
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { ref, computed, onMounted } from "vue";
-import { axiosPost, axiosGet } from "../services/service";
+import { axiosPost } from "../services/service";
 const route = useRoute();
 const store = useStore();
 const job_id = ref(route.params.job_id);
 const acceptAlert = ref(false);
-const rejectAlert = ref(false);
 const estimates = computed(() => {
   return store.state.property.estimates;
 });
@@ -84,16 +67,7 @@ async function accept(estimate_id, contractor_id, job_id) {
     acceptAlert.value = true;
   }
 }
-async function reject(estimate_id) {
-  console.log("reject", estimate_id);
-  const result = await axiosGet(`/deleteEstimate/?id=${estimate_id}`);
-  console.log(result);
-  if (result.status == 200) {
-    console.log(result.data);
-    await store.dispatch("triggerSetEstimates", { job_id: job_id.value });
-    rejectAlert.value = true;
-  }
-}
+
 onMounted(async () => {
   await store.dispatch("triggerSetEstimates", { job_id: job_id.value });
   console.log(estimates.value);

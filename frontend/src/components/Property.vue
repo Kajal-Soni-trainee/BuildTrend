@@ -1,4 +1,5 @@
 <template>
+
   <v-container class="d-flex flex-column justify-center align-center">
     <p v-if="properties.length == 0" class="text-red text-h2 text-center">
       No Property Added
@@ -49,6 +50,8 @@
       </v-card>
     </template>
   </v-container>
+
+  
 </template>
 <script setup>
 import { useStore } from "vuex";
